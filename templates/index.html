@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaspberryPI chat</title>
+    <link rel="stylesheet" type="text/css" href="static/css/chat.css">
+    <link rel="stylesheet" type="text/css" href="static/css/info-bar.css">
+    <link rel="stylesheet" type="text/css" href="static/css/messages.css">
+    <link rel="stylesheet" type="text/css" href="static/css/message.css">
+    <link rel="stylesheet" type="text/css" href="static/css/input.css">
+    <link rel="stylesheet" type="text/css" href="static/css/text-container.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+</head>
+<body>
+    
+    <div class="outerContainer">
+        <div class="container">
+            <!-- html pentru bara de sus -->
+            <div class="infoBar">
+                <div class="leftInnerContainer">
+                    <img src="static/icons/icons8-raspberry-pi-30.png" alt="rpi">
+                    <h3 class="raspChat">Raspberry PI</h3>
+                </div>
+
+            </div>
+
+            <!-- html pentru  mesaje-->
+
+            <div class="messages" id="messages">
+                <div class="message">
+
+                    <!-- partea pentru raspberry Pi -->
+                    <div class="messageContainer justifyStart">                       
+                        <div class="messageBox rpi">
+                             <p class="messageText rpi">Buna!</p> <!--aici facem append pentru mesajul raspberry -->
+                        </div>
+                        <p class="sentText pl-10">Raspberry</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- html pentru input -->
+            <form class="form" id="message_input_form">
+                <input class="input" id="message_input" type="text" placeholder="Type a message...">
+                <button class="sendButton" id="send_button" type="submit">Send</button>
+            </form>
+
+        </div>
+
+        <div class="textContainer">
+            <div>
+                <h1>Realtime Chat Application <span role="img" aria-label="emoji">💬</span></h1>
+                <h1>with RASPBERRY PI</h1>
+                <h2>Try it out right now! <span role="img" aria-label="emoji">⬅️</span></h2>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const socket = io.connect("http://127.0.0.1:5000");
+    socket.on('connect', function () {
+        socket.emit('join_room', "Hello");
+        let message_input = document.getElementById('message_input');
+
+        document.getElementById('message_input_form').onsubmit = function (e) {
+            e.preventDefault();//prevents refreshing
+            let message = message_input.value;
+            if (message.length) {
+                socket.emit('send_message', message)
+            }
+            message_input.value = '';
+            message_input.focus();
+        }
+    });
+    
+    function createServerMessageElement(data){ 
+      
+        const text = document.createElement('p');
+        text.className = 'messageText rpi'
+        text.innerHTML = data;
+
+        const box = document.createElement('div');
+        box.className = 'messageBox rpi';   
+        box.appendChild(text);
+
+        const tag = document.createElement('p');
+        tag.className = "sentText pl-10";
+        tag.innerHTML = "Raspberry";
+
+        const container = document.createElement('div');
+        container.className = 'messageContainer justifyStart';
+        container.appendChild(box);
+        container.appendChild(tag);
+
+        const message = document.createElement('div');
+        message.className = "message";
+        message.appendChild(container);
+
+        return message;
+    }
+
+    function createUserMessageElement(data){ 
+      
+      const text = document.createElement('p');
+      text.className = 'messageText user'
+      text.innerHTML = data;
+
+      const box = document.createElement('div');
+      box.className = 'messageBox user';   
+      box.appendChild(text);
+
+      const tag = document.createElement('p');
+      tag.className = "sentText pr-10";
+      tag.innerHTML = "user";
+
+      const container = document.createElement('div');
+      container.className = 'messageContainer justifyEnd';
+      container.appendChild(tag);
+      container.appendChild(box);
+     
+      const message = document.createElement('div');
+      message.className = "message";
+      message.appendChild(container);
+
+      return message;
+  }
+
+    socket.on('receive_message', function (data) {
+        const message = createUserMessageElement(data);
+        document.getElementById('messages').appendChild(message);
+    });
+    
+    socket.on('receive_message_server', function (data) {
+        const message = createServerMessageElement(data);
+        document.getElementById('messages').appendChild(message);
+    });
+    
+</script>
+</html>
