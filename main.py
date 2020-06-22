@@ -154,7 +154,7 @@ def LightUp(msg):
             response += "DIMM"
             DimmTwo(RGBRed, RGBGreen)
     if 'CYAN' in msg:
-        response = "Cyen led "
+        response = "Cyan led "
         if 'BLINK' in msg:
             response += "BLINK"
             duoBlink(RGBGreen, RGBBlue)
